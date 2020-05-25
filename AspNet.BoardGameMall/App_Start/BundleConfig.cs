@@ -13,11 +13,11 @@ namespace AspNet.BoardGameMall
                           "~/Content/bootstrap.css",
                           "~/Content/site.css"));
 
-            bundles.Add(new StyleBundle("~/Libraries/alertifyjs/css").Include(
+            bundles.Add(new StyleBundle("~/bundles/alertifyjs/css").Include(
                       "~/Libraries/alertifyjs/css/alertify.css",
                       "~/Libraries/alertifyjs/css/themes/bootstrap.css"));
 
-            bundles.Add(new StyleBundle("~/Libraries/star-rating-svg/css").Include(
+            bundles.Add(new StyleBundle("~/bundles/star-rating-svg/css").Include(
                           "~/Libraries/star-rating-svg/css/star-rating-svg.css"));
             #endregion
 
@@ -42,14 +42,14 @@ namespace AspNet.BoardGameMall
             bundles.Add(new ScriptBundle("~/bundles/bootstrap").Include(
                       "~/Scripts/bootstrap.bundle.js"));
 
-            bundles.Add(new ScriptBundle("~/Libraries/alertifyjs").Include(
+            bundles.Add(new ScriptBundle("~/bundles/alertifyjs").Include(
                       "~/Libraries/alertifyjs/alertify.js",
                       "~/Scripts/alertify.init.setting.js"));
 
-            bundles.Add(new ScriptBundle("~/Libraries/ckeditor").Include(
+            bundles.Add(new ScriptBundle("~/bundles/ckeditor").Include(
                       "~/Libraries/ckeditor/ckeditor.js"));
 
-            bundles.Add(new ScriptBundle("~/Libraries/star-rating-svg").Include(
+            bundles.Add(new ScriptBundle("~/bundles/star-rating-svg").Include(
                       "~/Libraries/star-rating-svg/jquery.star-rating-svg.js"));
             #endregion
 

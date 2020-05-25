@@ -25,7 +25,6 @@
         }
     </style>
 
-    <script src="~/Libraries/ckeditor/ckeditor.js"></script>
 </head>
 <body>
     <div class="container">
@@ -86,6 +85,7 @@
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/popper")
     @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/bundles/ckeditor")
 
     <script>
         CKEDITOR.replace(@Html.IdFor(model => model.Content), {

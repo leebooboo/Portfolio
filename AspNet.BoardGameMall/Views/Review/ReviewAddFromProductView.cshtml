@@ -17,7 +17,7 @@
     <title>상품후기 작성</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
-    <link href="~/Libraries/star-rating-svg/css/star-rating-svg.css" rel="stylesheet" />
+    @Styles.Render("~/bundles/star-rating-svg/css")
 
     <style>
         body {
@@ -26,7 +26,6 @@
         }
     </style>
 
-    <script src="~/Libraries/ckeditor/ckeditor.js"></script>
 </head>
 <body>
     <div class="container">
@@ -38,53 +37,53 @@
             @Html.HiddenFor(x => x.RefId)
             @Html.HiddenFor(x => x.RefLevel)
 
-        <div class="form-horizontal">
-            <h4>상품후기 작성</h4>
-            <div class="row">
-                <div class="col-2">
-                    <img src=@Url.Content(ViewBag.productImage) class="img-thumbnail p-1" alt="" />
+            <div class="form-horizontal">
+                <h4>상품후기 작성</h4>
+                <div class="row">
+                    <div class="col-2">
+                        <img src=@Url.Content(ViewBag.productImage) class="img-thumbnail p-1" alt="" />
+                    </div>
+                    <div class="col-10 align-self-center">@ViewBag.productName</div>
                 </div>
-                <div class="col-10 align-self-center">@ViewBag.productName</div>         
-            </div>
-            <hr />
-            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <hr />
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
-            <div class="form-group">
-                <label class="control-label col-md-2">상품 만족도</label>
-                <div class="starRating " data-rating='@Html.DisplayTextFor(model => model.Rating)' style="padding-left:12px;"></div>
-                @Html.HiddenFor(x => x.Rating)
-            </div>
+                <div class="form-group">
+                    <label class="control-label col-md-2">상품 만족도</label>
+                    <div class="starRating " data-rating='@Html.DisplayTextFor(model => model.Rating)' style="padding-left:12px;"></div>
+                    @Html.HiddenFor(x => x.Rating)
+                </div>
 
-            <div class="form-group">
-                @Html.LabelFor(model => model.Title, htmlAttributes: new { @class = "control-label col-md-2" })
-                <div class="col-md-10">
-                    @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control" } })
-                    @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Title, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Content, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-12">
+                        @Html.TextAreaFor(model => model.Content)
+                        @Html.ValidationMessageFor(model => model.Content, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col text-right">
+                        <input type="submit" value="등록" class="btn btn-primary" />
+                    </div>
                 </div>
             </div>
-
-            <div class="form-group">
-                @Html.LabelFor(model => model.Content, htmlAttributes: new { @class = "control-label col-md-2" })
-                <div class="col-12">
-                    @Html.TextAreaFor(model => model.Content)
-                    @Html.ValidationMessageFor(model => model.Content, "", new { @class = "text-danger" })
-                </div>
-            </div>
-
-            <div class="form-group">
-                <div class="col text-right">
-                    <input type="submit" value="등록" class="btn btn-primary" />
-                </div>
-            </div>
-        </div>
         }
     </div>
-    
+
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/popper")
     @Scripts.Render("~/bundles/bootstrap")
-
-    <script src="~/Libraries/star-rating-svg/jquery.star-rating-svg.js"></script>
+    @Scripts.Render("~/bundles/star-rating-svg")
+    @Scripts.Render("~/bundles/ckeditor")
 
     <script>
         $(".starRating").starRating({
@@ -112,12 +111,12 @@
         };
 
         function success(data) {
-            if (data.IsSuccess) { //Url.Action() 에서 라우트 데이터가 2개 이상이면 & 을 &amp; 으로 변환하는데, 그냥 사용하면 ajax가 정상 작동을 안해서 Html.Raw로 감싸줘야됨                
+            if (data.IsSuccess) { //Url.Action() 에서 라우트 데이터가 2개 이상이면 & 을 &amp; 으로 변환하는데, 그냥 사용하면 ajax가 정상 작동을 안해서 Html.Raw로 감싸줘야됨
                 console.log("ajax 입력 성공");
                 console.log("주소: ", '@Html.Raw(Url.Action("ProductViewReview", "Review", new { productId = Model.ProductId, page = 1 }))');
                 $(opener.document).find("#ReviewList").load('@Html.Raw(Url.Action("ProductViewReview", "Review", new { productId = Model.ProductId, page = 1 }))', function () {
                     window.close(); //ajax.load() 완료 콜백으로 안넣으면 load()가 제대로 동작을 안함
-                });                
+                });
             }
             else
                 alert("요청이 정상적으로 처리되지 않았습니다.\n" + data.ErrorMessage);
