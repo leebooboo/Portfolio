@@ -25,18 +25,6 @@ namespace AspNet.BoardGameMall.Controllers
 
         public ActionResult List(int page = 1, int pageSize = 10)
         {
-            if (TempData["IsAlertifySuccess"] != null)
-                ViewBag.IsAlertifySuccess = TempData["IsAlertifySuccess"];
-
-            if (TempData["AlertifySuccessMsg"] != null)
-                ViewBag.AlertifySuccessMsg = TempData["AlertifySuccessMsg"];
-
-            if (TempData["IsAlertifyError"] != null)
-                ViewBag.IsAlertifyError = TempData["IsAlertifyError"];
-
-            if (TempData["AlertifyErrorMsg"] != null)
-                ViewBag.AlertifyErrorMsg = TempData["AlertifyErrorMsg"];
-
             return View(reviewService.GetList(page, pageSize));
         }
 
@@ -98,7 +86,7 @@ namespace AspNet.BoardGameMall.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-
+            
             var model = reviewService.View((long)id);
             if(Request.UrlReferrer != null && Request.UrlReferrer.Query.Length >= 1)
             {
@@ -247,7 +235,7 @@ namespace AspNet.BoardGameMall.Controllers
 
             TempData["IsAlertifySuccess"] = true;
             TempData["AlertifySuccessMsg"] = "삭제 요청이 완료됐습니다.";
-
+            
             return RedirectToAction("List");
         }
     }

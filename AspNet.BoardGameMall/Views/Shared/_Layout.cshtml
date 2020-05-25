@@ -136,12 +136,12 @@
     <script src="~/Scripts/GlobalFunction.js"></script>
 
     <script>
-        if ('@ViewBag.IsAlertifySuccess' != null && '@ViewBag.IsAlertifySuccess' == 'True') {
-            alertify.success('@ViewBag.AlertifySuccessMsg');
+        if ('@TempData["IsAlertifySuccess"]' != null && '@TempData["IsAlertifySuccess"]' == 'True') {
+            alertify.success('@TempData["AlertifySuccessMsg"]');
         }
-
-        if ('@ViewBag.IsAlertifyError' != null && '@ViewBag.IsAlertifyError' == 'True') {
-            alertify.error('@ViewBag.AlertifyErrorMsg');
+        
+        if ('@TempData["IsAlertifyError"]' != null && '@TempData["IsAlertifyError"]' == 'True') {
+            alertify.error('@TempData["AlertifyErrorMsg"]');
         }
     </script>
 
