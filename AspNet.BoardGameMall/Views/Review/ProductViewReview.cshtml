@@ -1,0 +1,87 @@
+﻿@using X.PagedList;
+@using X.PagedList.Mvc;
+@using X.PagedList.Mvc.Common;
+
+@model Portfolio.Services.DTO.ReviewContainAnswersDto
+
+<div class="table-responsive">
+    <table class="table table-sm">
+        <tbody>
+            @if(Model.Reviews.Count() == 0)
+            {
+                <tr>
+                    <td class="col-12 text-center">
+                        등록된 상품 후기가 없습니다.
+                    </td>
+                </tr>
+            }
+
+            @foreach (var item in Model.Reviews)
+            {
+                <tr data-reviewId="@item.ReviewId" data-content="@item.Content" onclick="showReviewContent(this)" style="cursor:pointer">
+                    <td class="col-6 text-nowrap text-left">
+                        @if (item.RefLevel == 0)
+                        {
+                            <i class="fab fa-quora" style="color:cornflowerblue"></i>
+                        }
+                        else
+                        {
+                            for (int i = 1; i <= item.RefLevel; i++)
+                            {
+                                <span>&nbsp;&nbsp;&nbsp;</span> //답변 행을 뒤로 밀어주기 위해 공백추가
+                            }
+                            <i class="fas fa-reply fa-rotate-180" style="color:orangered"></i>
+                        }
+                        @Html.DisplayFor(modelItem => item.Title)
+                    </td>
+                    <td class="col-2 text-nowrap text-left">
+                        @if (item.RefLevel == 0)
+                        {
+                            <div class="my-rating" data-rating='@item.Rating'></div>
+                        }
+                        else
+                        {
+
+                        }
+                    </td>
+                    <td class="col-2 text-nowrap text-left">
+                        @Html.DisplayFor(modelItem => item.UserName)
+                    </td>
+                    <td class="col-2 text-nowrap text-right">
+                        @Html.DisplayFor(modelItem => item.InsertDt)
+                    </td>
+                </tr>
+                <tr style="display:none;">
+                    <td colspan="4">
+                        <div >
+                            @Html.Raw(@item.Content)
+                            <div class="mt-1" style="float:right; clear:right;" >
+                                <a href='@Url.Action("ReviewAddFromProductView", "Review", new { productId = item.ProductId, productName = ViewBag.productName, refLevel = item.RefLevel + 1 , refId = item.ReviewId })' onclick="window.open(this.href, '답글 작성', 'width=800, height=600'); return false;" class="btn btn-sm btn-light">답글</a>
+                            </div>
+                        </div>                        
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@Html.PagedListPager((IPagedList)Model.Pagenation, page => Url.Action("ProductViewReview", "Review", new { productId = Model.Reviews.First().ProductId, page = page }),
+                        PagedListRenderOptions.EnableUnobtrusiveAjaxReplacing(
+                            new PagedListRenderOptions
+                            {
+                                //리스트를 역순으로 해야 페이지에서 정상 적용됨
+                                ContainerDivClasses = new string[] { "pagination-container" },
+                                UlElementClasses = new string[] { "m-0", "pagination-sm", "pagination" },
+                                LiElementClasses = new string[] { "page-item" },
+                                Display = PagedListDisplayMode.IfNeeded,
+                                PageClasses = new string[] { "page-link" },
+
+                            },
+                        new AjaxOptions
+                        {
+                            HttpMethod = "GET",
+                            InsertionMode = InsertionMode.Replace,
+                            UpdateTargetId = "ReviewList"
+                        }))
+

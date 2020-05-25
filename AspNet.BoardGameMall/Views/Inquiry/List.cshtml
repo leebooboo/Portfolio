@@ -1,0 +1,97 @@
+﻿@using X.PagedList;
+@using X.PagedList.Mvc;
+@using X.PagedList.Mvc.Common;
+
+@model Portfolio.Services.DTO.InquiryContainAnswersDto
+
+@{
+    ViewBag.Title = "상품문의 게시판";
+    ViewBag.pageSize = ((IPagedList)Model.Pagenation).PageSize;
+}
+
+@Html.MenuIdentity("상품문의 게시판")
+
+<div class="dropdown text-right mb-1">
+    <a class="btn btn-sm btn-outline-success dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        @ViewBag.pageSize<span>개씩 보기</span>
+    </a>
+
+    <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+        <a class="dropdown-item" href="@Url.Action("List", "Inquiry", new { page = 1, pageSize = 2 })" data-pagesize="2">2개씩 보기</a>
+        <a class="dropdown-item" href="@Url.Action("List", "Inquiry", new { page = 1, pageSize = 5 })" data-pagesize="5">5개씩 보기</a>
+        <a class="dropdown-item" href="@Url.Action("List", "Inquiry", new { page = 1, pageSize = 10 })" data-pagesize="10">10개씩 보기</a>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table">
+        <tr>
+            <th class="text-center text-nowrap">
+                @Html.DisplayNameFor(model => model.Inquiries.First().Title)
+            </th>
+            <th class="text-center text-nowrap">
+                @Html.DisplayNameFor(model => model.Inquiries.First().UserName)
+            </th>
+            <th class="text-center text-nowrap">
+                @Html.DisplayNameFor(model => model.Inquiries.First().InsertDt)
+            </th>
+        </tr>
+
+        @foreach (var item in Model.Inquiries)
+        {
+            <tr>
+                <td class="text-left">
+                    @if (item.RefLevel == 0)
+                    {
+                        <div class="d-flex align-items-center">
+                            <div class="mr-2">
+                                <img src="@Url.Content(item.Product.ProductMainImagePath)" class="" style="max-width:70px; height:auto; object-fit:contain;" alt="..." />
+                            </div>
+                            <div class="text-nowrap">
+                                <b>@Html.DisplayFor(modelItem => item.Product.ProductName)</b><br>
+                                @if (item.IsLocked)
+                                {
+                                    <i class="fas fa-lock fa-sm" style="color:gray"></i>
+                                }
+                                @Html.ActionLink(item.Title, "View", "Inquiry", new { id = item.InquiryId }, new { @class = "text-muted text-nowrap" })
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        for (int i = 1; i <= item.RefLevel; i++)
+                        {
+                            <span>&nbsp;&nbsp;&nbsp;</span> //답변 행을 뒤로 밀어주기 위해 공백추가
+                        }
+                        <i class="fas fa-reply fa-rotate-180" style="color:orangered"></i>
+                        if (item.IsLocked)
+                        {
+                            <i class="fas fa-lock fa-sm" style="color:gray"></i>
+                        }
+                        @Html.ActionLink(item.Title, "View", "Inquiry", new { id = item.InquiryId }, new { @class = "text-muted text-nowrap" })
+                    }
+                </td>
+                <td class="text-center align-middle text-nowrap">
+                    @Html.DisplayFor(modelItem => item.UserName)
+                </td>
+                <td class="text-center align-middle text-nowrap">
+                    @Html.DisplayFor(modelItem => item.InsertDt)
+                </td>
+            </tr>
+        }
+
+    </table>
+</div>
+
+<div class="d-flex justify-content-end">
+    @Html.ActionLink("글쓰기", "Create", null, new { @class = "btn btn-sm btn-outline-secondary" })
+</div>
+@Html.PagedListPager((IPagedList)Model.Pagenation, page => Url.Action("List", "Inquiry", new { page = page, pageSize = ((IPagedList)Model.Pagenation).PageSize }), new PagedListRenderOptionsBase { ContainerDivClasses = new string[] { "text-center" }, DisplayLinkToFirstPage = PagedListDisplayMode.Always, DisplayLinkToLastPage = PagedListDisplayMode.Always })
+
+@section scripts
+{
+    <script>
+        $(".dropdown-item[data-pagesize=@ViewBag.pageSize]").css("color", "forestgreen").css("font-weight", "bold");
+    </script>
+
+}

@@ -1,0 +1,25 @@
+﻿@model Portfolio.Entities.Models.Product
+
+<div class="col mb-4" href="#">
+    <div class="card h-100">
+        <img src=@Url.Content(Model.ProductMainImagePath) class="card-img-top p-2" style="width:auto; max-height:15rem; object-fit:contain;" alt="...">        
+        <h5 class="card-title text-center mb-0">@Html.DisplayFor(x => x.ProductName)</h5>
+        <div class="card-body pt-1">
+            <p class="card-text text-center">
+                <small style="color:darkgray">@Html.DisplayFor(x => x.Summary)</small><br>
+                @if (Model.PromotionPrice != null)
+                {
+                    decimal dc = Math.Round(100 - ((decimal)Model.PromotionPrice) / Model.Price * 100m);
+                    <small style="color:darkgray"><del>@Html.DisplayFor(x => x.Price)원</del></small><br>
+                    <span style="color:#E50000;"><b>@dc% </b></span><span class="font-weight-bold">@Html.DisplayFor(x => x.PromotionPrice)</span><span>원</span>
+                }
+                else
+                {
+                    <br>
+                    <span class="font-weight-bold">@Html.DisplayFor(x => x.Price)</span><span>원</span>
+                }
+            </p>
+            <a href=@Url.Action("View", "Product", new { id = Model.ProductId }) class="stretched-link"></a>
+        </div>
+    </div>
+</div>

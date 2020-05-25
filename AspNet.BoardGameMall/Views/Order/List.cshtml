@@ -1,0 +1,79 @@
+﻿@model IEnumerable<Portfolio.Entities.Models.Order>
+
+@{
+    ViewBag.Title = "주문내역";
+}
+
+@section head
+{
+    <link href="~/Libraries/bootstrap-datepicker/bootstrap-datepicker.min.css" rel="stylesheet" />
+}
+
+@Html.MenuIdentity("주문내역")
+
+<div class="d-flex flex-row justify-content-end align-items-center mb-2">
+    <input type="text" class="form-control datepicker text-center" id="startDatePicker" value="@ViewBag.startDt.ToString("yyyy.MM.dd")" style="width:100px; display:inline-block;" />
+    <span> ~ </span>
+    <input type="text" class="form-control datepicker text-center mr-1" id="endDatePicker" value="@ViewBag.endDt.ToString("yyyy.MM.dd")" style="width:100px; display:inline-block;" />
+    <button class="btn btn-outline-secondary" onclick="search()" style="display:inline-block;"><i class="fas fa-search"></i>조회</button>
+</div>
+
+
+<div class="table-responsive">
+    <table class="table">
+        <tr>
+            <th class="text-nowrap text-center">
+                @Html.DisplayNameFor(model => model.OrderNo)
+            </th>
+            <th class="text-nowrap text-center">
+                @Html.DisplayNameFor(model => model.InsertDt)
+            </th>
+            <th class="text-nowrap text-center">
+                @Html.DisplayNameFor(model => model.TotalPrice)
+            </th>
+            <th class="text-nowrap text-center">
+                @Html.DisplayNameFor(model => model.OrderType.Type)
+            </th>
+        </tr>
+
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td class="text-nowrap text-center">
+                    <a href="@Url.Action("View", new { id = item.OrderId, startDt = ViewBag.startDt, endDt = ViewBag.endDt })">@Html.DisplayFor(modelItem => item.OrderNo)</a>
+                </td>
+                <td class="text-nowrap text-center">
+                    @Html.DisplayFor(modelItem => item.InsertDt)
+                    @*@item.InsertDt.ToString("yyyy-MM-dd HH:mm:ss")*@
+                </td>
+                <td class="text-nowrap text-center">
+                    @Html.DisplayFor(modelItem => item.TotalPrice)<span>원</span>
+                </td>
+                <td class="text-nowrap text-center">
+                    @Html.DisplayFor(modelItem => item.OrderType.Type)
+                </td>
+            </tr>
+        }
+    </table>
+</div>
+
+@section scripts
+{
+    <script src="~/Libraries/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
+    <script src="~/Libraries/bootstrap-datepicker/bootstrap-datepicker.ko.min.js"></script>
+
+    <script>
+        $('.datepicker').datepicker({
+            format: "yyyy.mm.dd",
+            maxViewMode: 2,
+            language: "ko",
+            autoclose: true,
+            todayHighlight: true
+        });
+
+        function search() {
+            location.href = '@Url.Action("List")?startDt=' + $("#startDatePicker").val() + '&endDt=' + $("#endDatePicker").val();
+        }
+    </script>
+
+}

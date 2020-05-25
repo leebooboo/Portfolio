@@ -1,0 +1,7 @@
+﻿.menu a {
+    cursor: pointer;
+}
+
+.menu .hide {
+    display: none;
+}

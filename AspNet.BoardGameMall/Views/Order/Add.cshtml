@@ -1,0 +1,91 @@
+﻿@model List<Portfolio.Services.DTO.CheckoutItemDto>
+
+@{
+    ViewBag.Title = "주문";
+    var sumPrice = 0m;
+    foreach (var item in Model)
+    {
+        sumPrice += item.Price * item.ProductCount;
+    }
+}
+
+@Html.MenuIdentity("상품주문")
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col" class="text-center">상품정보</th>
+                <th scope="col" class="text-center">판매가</th>
+                <th scope="col" class="text-center">수량</th>
+                <th scope="col" class="text-center">합계</th>
+            </tr>
+        </thead>
+        <tbody>
+            @using (Html.BeginForm("Order", "Order", FormMethod.Post, new { id = "frm" }))
+            {
+                @Html.AntiForgeryToken()
+                for (int i = 0; i < Model.Count(); i++)
+                {
+                    <tr data-productid="@Model[i].ProductId" data-productcount="@Model[i].ProductCount" data-productprice="@Model[i].Price" data-productname="@Model[i].ProductName" data-mainimagepath="@Model[i].MainImagePath">
+                        @Html.Hidden($"productList[{i}].ProductId", Model[i].ProductId)
+                        @Html.Hidden($"productList[{i}].ProductName", Model[i].ProductName)
+                        @Html.Hidden($"productList[{i}].Price", Model[i].Price)
+                        @Html.Hidden($"productList[{i}].ProductCount", Model[i].ProductCount)
+                        @Html.Hidden($"productList[{i}].MainImagePath", Model[i].MainImagePath)
+                        <td class="align-middle text-nowrap">
+                            <span>
+                                <a href=@Url.Action("View", "Product", new { id = Model[i].ProductId }) class="text-decoration-none">
+                                    <img src=@Url.Content(Model[i].MainImagePath) class="img-thumbnail" style="max-height:100px; max-width:100px;" alt="...">
+                                </a>
+                                @Html.DisplayFor(x => Model[i].ProductName)
+                            </span>
+                        </td>
+                        <td class="align-middle text-center text-nowrap">@Html.DisplayFor(x => Model[i].Price)원</td>
+                        <td class="align-middle text-center text-nowrap">@Html.DisplayFor(x => Model[i].ProductCount)</td>
+                        <td class="align-middle text-center text-nowrap"><b><span id="sumPrice">@Html.FormatValue(Model[i].Price * Model[i].ProductCount, "{0:#,0}")</span>원</b></td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<hr />
+<div class="row px-3 mb-2">
+    <div class="col text-right ">
+        <span class="mr-3">상품합계금액</span><span id="totalPrice" class="h3 font-weight-bolder">@sumPrice.ToString("#,0")</span>원
+    </div>
+</div>
+<div class="custom-control custom-checkbox">
+    <input type="checkbox" class="custom-control-input" id="agreeCheck">
+    <label class="custom-control-label" for="agreeCheck">이 사이트는 데모용 사이트임을 인지하며 주문 이후에 주문 내역만 존재하고 실제 상품의 구매나 발송이 없음을 확인 및 동의합니다.</label>
+</div>
+<div class="row px-3">
+    <div class="col text-right">
+        <button class="btn btn-outline-secondary" id="orderBtn" onclick="document.getElementById('frm').submit()" disabled>주문하기</button>
+    </div>
+
+</div>
+
+@section Scripts
+{
+    <script>
+        $("#agreeCheck").change(function () {
+            if ($("#agreeCheck").prop("checked")) {
+                $("#orderBtn").prop("disabled", false);
+            }
+            else {
+                $("#orderBtn").prop("disabled", true);
+            }
+        });
+
+        $(document).ready(function () {
+            console.log("raedy");
+            $("#orderBtn").prop("disabled", true);
+            $("#agreeCheck").prop("checked", false);
+        });
+
+
+    </script>
+}

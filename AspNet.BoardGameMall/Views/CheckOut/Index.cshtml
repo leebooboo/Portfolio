@@ -1,0 +1,289 @@
+﻿@model List<Portfolio.Services.DTO.CheckoutItemDto>
+
+@{
+    ViewBag.Title = "장바구니";
+}
+
+@Html.MenuIdentity("장바구니")
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col" class="text-center"><input type="checkbox" id="checkAll" onchange="checkedAll()" /></th>
+                <th scope="col" class="text-center">상품정보</th>
+                <th scope="col" class="text-center">판매가</th>
+                <th scope="col" class="text-center">수량</th>
+                <th scope="col" class="text-center">합계</th>
+            </tr>
+        </thead>
+        <tbody>
+            @using (Html.BeginForm("Add", "Order", FormMethod.Post, new { id = "frm" }))
+            {
+                @Html.AntiForgeryToken()
+                for (int i = 0; i < Model.Count(); i++)
+                {
+                    <tr data-productid="@Model[i].ProductId" data-productcount="@Model[i].ProductCount" data-productprice="@Model[i].Price" data-productname="@Model[i].ProductName" data-mainimagepath="@Model[i].MainImagePath">
+                        @Html.Hidden($"products[{i}].ProductId", Model[i].ProductId)
+                        @Html.Hidden($"products[{i}].ProductName", Model[i].ProductName)
+                        @Html.Hidden($"products[{i}].Price", Model[i].Price)
+                        @Html.Hidden($"products[{i}].MainImagePath", Model[i].MainImagePath)
+                        <td class="align-middle text-center text-nowrap">
+                            @Html.CheckBox($"products[{i}].IsChecked", Model[i].IsChecked, new { onchange = "updateTotalPrice()", @class = "" })
+                        </td>
+                        <td class="align-middle text-nowrap">
+                            <span>
+                                <a href=@Url.Action("View", "Product", new { id = Model[i].ProductId }) class="text-decoration-none">
+                                    <img src=@Url.Content(Model[i].MainImagePath) class="img-thumbnail" style="max-height:100px; max-width:100px;" alt="...">
+                                </a>
+                                @Html.DisplayFor(x => Model[i].ProductName)
+                            </span>
+                        </td>
+                        <td class="align-middle text-center text-nowrap">@Html.DisplayFor(x => Model[i].Price)원</td>
+                        <td class="align-middle text-center text-nowrap">
+                            <div class="form-inline d-flex flex-nowrap justify-content-center">
+                                @Html.TextBox($"products[{i}].ProductCount", Model[i].ProductCount, new { @class = "form-control form-control-sm text-center", style = "width:40px;" })
+                                <button class="btn btn-sm btn-dark ml-1" name="changeBtn">변경</button>
+                            </div>
+                        </td>
+                        <td class="align-middle text-center text-nowrap"><b><span id="sumPrice">@Html.FormatValue(Model[i].Price * Model[i].ProductCount, "{0:#,0}")</span>원</b></td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<hr />
+<div class="row px-3 mb-2">
+    <div class="col text-right ">
+        <span class="mr-3">상품합계금액</span><span id="totalPrice" class="h3 font-weight-bolder"></span>원
+    </div>
+</div>
+<div class="row px-3">
+    <div class="col">
+        <button class="btn btn-outline-secondary" onclick="checkedItemsDelete()">선택 상품 삭제</button>
+    </div>
+    <div class="col text-right">
+        <button class="btn btn-outline-secondary" onclick="submitForm()">주문하기</button>
+    </div>
+
+</div>
+
+
+@section Scripts
+{
+    <script>
+        var userAuthorized = @User.Identity.IsAuthenticated.ToString().ToLower();
+
+        $(document).ready(function () {
+
+            if (userAuthorized) {
+
+                if ($.cookie("Checkout") != null) {
+
+                    var checkoutsCookie = JSON.parse($.cookie("Checkout"));
+
+                    if (checkoutsCookie.length > 0) {
+
+                        alertify.confirm("로그인 이전에 장바구니에 추가한 상품이 있습니다.<br>해당 상품들을 추가하시겠습니까?", function (e) {
+                            if (e) {
+                                $.ajax({
+                                        url: '@Url.Action("CookieItemsAddToDb", "CheckOut")',
+                                        type: "GET",
+                                        success: function (data) {
+                                            console.log("ajax 성공");
+
+                                            if (data.IsSuccess) {
+                                                alertify.alert(data.SuccessMessage, function () {
+                                                    location.reload(); //페이지 리로드
+                                                });
+                                            }
+                                            else
+                                                alertify.alert("요청이 정상적으로 처리되지 않았습니다.<br>" + data.ErrorMessage);
+                                        }
+                                });
+                            }
+                        });
+                    }
+                }
+            }
+
+            $("#checkAll").prop("checked", true);
+            checkedAll();
+        });
+
+        function checkedAll() {
+            if ($("#checkAll").is(":checked"))
+                $("input[name^=products][name$=IsChecked]").prop("checked", true);
+            else
+                $("input[name^=products][name$=IsChecked]").prop("checked", false);
+
+            updateTotalPrice();
+        }
+
+        $("button[name=changeBtn]").on("click", function (e) { //수량 변경 버튼 클릭시
+            event.preventDefault();
+
+            var row = $(this).parents("tr");
+            console.log(row);
+
+            var inputValue = $(this).prev("input").val();
+
+            if (inputValue <= 0) {
+                alertify.alert("수량을 1개이상으로 입력할 수 있습니다.");
+                return;
+            }
+
+            row.data("productcount", $(this).prev("input").val());
+
+            if (userAuthorized) { //DB에 수량 업데이트
+                $.ajax({
+                    url: '@Url.Action("AddCart", "CheckOut")',
+                    type: "POST",
+                    data: { productId: row.data("productid"), productCount: row.data("productcount"), @Html.AntiForgeryTokenForAjaxPost() },
+                    success: function (data) {
+                        if (data.IsSuccess)
+                            calculateSumPrice(row);
+                        else
+                            alert("요청이 정상적으로 처리되지 않았습니다.\n" + data.ErrorMessage);
+                    },
+                    error: function (xhr, textStatus, errorThrownata) {
+                        var win = window.open("", "에러 메세지");
+                        win.document.write(xhr.responseText);
+                    }
+                });
+            }
+            else { //쿠키에 수량 업데이트
+                var checkoutsCookie = JSON.parse($.cookie("Checkout"));
+
+                var index = checkoutsCookie.findIndex(x => x.ProductId == row.data("productid"));
+
+                checkoutsCookie[index].ProductCount = row.data("productcount");
+
+                $.cookie("Checkout", JSON.stringify(checkoutsCookie), { expires: 7, path: "/" }); //쿠키에 저장
+
+                calculateSumPrice(row);
+            }
+        });
+
+        //상품 [합계] 계산
+        function calculateSumPrice(row) {
+            var sumPrice = row.data("productcount") * row.data("productprice");
+
+            row.children(":last").find("#sumPrice").text(CreateMoneyComma(sumPrice));
+
+            updateTotalPrice();
+        }
+
+        //선택된 상품들의 총 [상품합계금액] 계산
+        function updateTotalPrice() {
+            var totalPrice = 0;
+            $("input[name^=products][name$=IsChecked]:checked").each(function () {
+                totalPrice += Number(DeleteMoneyComma($(this).parents("tr").children(":last").find("#sumPrice").text()));
+            })
+
+            $("#totalPrice").text(CreateMoneyComma(totalPrice));
+        }
+
+        function checkedItemsDelete() {
+            if ($("input[name^=products][name$=IsChecked]:checked").parents("tr").length == 0)
+                return;
+
+            //삭제 여부 확인
+            alertify.confirm("선택한 상품들을 삭제하시겠습니까?", function (e) {
+                if (e) {
+                    if (userAuthorized) { //DB에서 삭제
+                        var checkedRows = $("input[name^=products][name$=IsChecked]:checked").parents("tr");
+
+                        var productIdList = [];
+                        checkedRows.each(function (index) {
+                            productIdList.push(checkedRows[index].dataset.productid);
+                        });
+
+                        $.ajax({
+                            url: '@Url.Action("DeleteItem", "CheckOut")',
+                            type: "POST",
+                            data: { productIdList: productIdList, @Html.AntiForgeryTokenForAjaxPost() },
+                            success: function (data) {
+                                if (data.IsSuccess) {
+                                    checkedRows.remove(); //html에서 상품 삭제
+                                    updateTotalPrice();
+                                }
+                                else
+                                    alert("요청이 정상적으로 처리되지 않았습니다.\n" + data.ErrorMessage);
+                            },
+                            error: function (xhr, textStatus, errorThrownata) {
+                                var win = window.open("", "에러 메세지");
+                                win.document.write(xhr.responseText);
+                            }
+                        });
+                    } else { //쿠키에서 삭제
+                        if ($.cookie("Checkout") == null)
+                            return;
+
+                        var checkoutsCookie = JSON.parse($.cookie("Checkout"));
+
+                        var checkedRows = $("input[name^=products][name$=IsChecked]:checked").parents("tr");
+                        checkedRows.each(function (index) {
+
+                            var cookieIndex = checkoutsCookie.findIndex(x => x.ProductId == checkedRows[index].dataset.productid);
+                            console.log("삭제할 인덱스", cookieIndex);
+
+                            if (cookieIndex >= 0) {
+                                checkoutsCookie.splice(cookieIndex, 1);
+                            }
+                        });
+
+                        $.cookie("Checkout", JSON.stringify(checkoutsCookie), { expires: 7, path: "/" }); //쿠키에 저장
+
+                        checkedRows.remove(); //html에서 상품 삭제
+                    }
+
+                    updateTotalPrice();
+                }
+            });
+        }
+
+        $("input[name^=products][name$=ProductCount]").on("change", function () {
+            if (!$.isNumeric($(this).val())) {
+                alertify.alert("구매수량은 숫자만 가능합니다.");
+                $(this).val($(this).prop("defaultValue"));
+                return false;
+            }
+
+            if ($(this).val() <= 0) {
+                alertify.alert("1개이상의 수량을 입력해주세요.");
+                $(this).val($(this).prop("defaultValue"));
+                return false;
+            }
+        });
+
+        function submitForm() {
+            var isError = false;
+
+            if ($("input[name^=products][name$=IsChecked]:checked").length <= 0) {
+                alertify.alert("선택한 상품이 없습니다.");
+                return;
+            }
+
+            //체크된 상품중에 수량을 변경하고 변경을 누르지 않아 합계가 정상 적용되지 않은 상품을 체크
+            $("input[name^=products][name$=IsChecked]:checked").each(function () {
+                var price = $(this).parents("tr").find("input[name^=products][name$=Price]").val();
+                var count = $(this).parents("tr").find("input[name^=products][name$=ProductCount]").val();
+                //console.log(count);
+                var totalPrice = Number(DeleteMoneyComma($(this).parents("tr").children(":last").find("#sumPrice").text()));
+
+                if (price * count != totalPrice) {
+                    alertify.alert("["+ $(this).parents("tr").find("input[name^=products][name$=ProductName]").val() + "] 상품의 수량과 합계가 다릅니다.<br>수량 변경 버튼을 눌러 갱신해주세요.")
+                    //console.log("합계가 다릅니다. price * count = ", price * count, "    totalPrice =", totalPrice);
+                    isError = true;
+                    return false; //jquery each에서 return false는 루프의 break 기능
+                }
+            })
+
+            if (!isError)
+                $("#frm").submit();
+        }
+    </script>
+}

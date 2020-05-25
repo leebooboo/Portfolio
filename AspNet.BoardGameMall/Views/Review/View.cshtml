@@ -1,0 +1,108 @@
+﻿@using Microsoft.AspNet.Identity
+
+@model Portfolio.Entities.Models.Review
+
+@{
+    ViewBag.Title = $"{Model.Product.ProductName} 상품후기";
+}
+
+@Html.MenuIdentity("상품후기")
+
+<div class="container">
+    @if (User.Identity.GetUserId() == Model.UserId)
+    {
+        <div class="row align-items-center mb-1">
+            <div class="col text-right">
+                @Html.ActionLink("수정", "Edit", new { id = Model.ReviewId }, new { @class = "btn btn-sm btn-outline-secondary ml-2" })
+
+                @using (Html.BeginForm("Delete", "Review", FormMethod.Post, new { id = "deleteForm", style = "display:inline;" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.HiddenFor(x => x.ReviewId)
+                    <button class="btn btn-sm btn-outline-secondary ml-2" onclick="deleteReview()">삭제</button>
+                }
+            </div>
+        </div>
+    }
+    <div class="row align-items-center py-2 bg-light border-top border-bottom">
+        <div class="col">
+            <span class="h5 font-weight-bold">@Html.DisplayFor(model => model.Title)</span>
+        </div>
+    </div>
+    <div class="row align-items-center py-1 border-bottom text-muted">
+        <div class="col">
+            @Html.DisplayFor(x => x.UserName) &nbsp&nbsp<span class="text-muted">|</span>&nbsp&nbsp @Html.DisplayFor(x => x.InsertDt)
+        </div>
+    </div>
+
+    @if (Model.RefLevel == 0)
+    {
+        <div class="row align-items-center border-bottom py-1">
+            <div class="col">
+                <div class="starRating" data-rating='@Model.Rating'></div>
+            </div>
+        </div>
+    }
+    <div class="row align-items-center py-1">
+        <div class="col-md-2">
+            <img src="@Url.Content(Model.Product.ProductMainImagePath)" class="" style="height:200px; width:auto; max-height:200px;" alt="" />
+        </div>
+        <div class="col-md-10 align-items-start">
+            <span class="h5 font-weight-bold">@Html.DisplayFor(x => x.Product.ProductName)</span><br />
+            @Html.DisplayFor(x => x.Product.Summary)
+        </div>
+    </div>
+    <div class="row align-items-center border-bottom py-1 mt-3">
+        <div class="col">
+            @Html.Raw(Model.Content)
+        </div>
+    </div>
+
+    <div class="row align-items-center py-1">
+        <div class="col text-right">
+            @Html.ActionLink("답글", "Reply", new { productId = Model.ProductId, refLevel = Model.RefLevel + 1, refId = Model.ReviewId, refTitle = Model.Title }, new { @class = "btn btn-sm btn-outline-secondary " })
+            @if (ViewBag.page == null)
+            {
+                @Html.ActionLink("목록", "List", null, new { @class = "btn btn-sm btn-outline-secondary ml-2" })
+            }
+            else
+            {
+                @Html.ActionLink("목록", "List", new { page = ViewBag.page, pageSize = ViewBag.pageSize ?? 10 }, new { @class = "btn btn-sm btn-outline-secondary ml-2" })
+            }
+        </div>
+    </div>
+</div>
+
+
+@section scripts
+{
+    <script>
+        $(".starRating").starRating({
+            starSize: 25,
+            starShape: 'rounded',
+            readOnly: true,
+            emptyColor: 'lightgray',
+            hoverColor: 'salmon',
+            activeColor: 'cornflowerblue',
+            callback: function (currentRating, $el) {
+                // make a server call here
+            }
+        });
+
+        $("img").not("#MainLogoImage").addClass("mw-100 h-auto"); //너무 큰 이미지 레이아웃에 맞게 축소
+
+        function deleteReview() {
+            event.preventDefault();
+
+            alertify.confirm("정말 상품후기를 삭제하시겠습니까?",
+                function () {
+                    $("#deleteForm").submit();
+                },
+                function () {
+                    alertify.error("삭제 요청이 취소됐습니다.");
+                });
+        }
+
+    </script>
+
+}

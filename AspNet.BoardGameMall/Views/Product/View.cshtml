@@ -1,0 +1,310 @@
+﻿@model Portfolio.Services.DTO.ProductViewDto
+
+<div class="row">
+    <div class="col-lg-6 col-xs-12 pr-lg-5">
+        @if (Model.ProductImages.FirstOrDefault(x => x.ImageUseTypeId == 1) == null)
+        {
+            <img src=@Url.Content("~/Images/ImageEmpty.jpg") class="img-thumbnail p-5" alt="" />
+        }
+        else
+        {
+            <img src=@Url.Content(Model.ProductImages.First(x => x.ImageUseTypeId == 1).ImagePath) class="img-thumbnail p-5" alt="" />
+        }
+
+    </div>
+    <div class="col-lg-6 col-xs-12 mt-4 mt-lg-0">
+        <div class="row">
+            <div class="col-12">
+                <h3><b>@Html.DisplayFor(x => x.Product.ProductName)</b></h3>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <span style="color:gray;">@Html.DisplayFor(x => x.Product.Summary)</span>
+            </div>
+        </div>
+        <hr class="mt-2" />
+        @if (Model.Product.PromotionPrice != null)
+        {
+            decimal dc = Math.Round(100 - ((decimal)Model.Product.PromotionPrice) / Model.Product.Price * 100m);
+
+            <div class="row">
+                <div class="col-4 col-sm-2">판매가</div><div class="col-8 col-sm-10" style="color:rgb(120, 120, 120);"><del><b>@Html.DisplayFor(x => x.Product.Price)원</b></del></div>
+            </div>
+            <div class="row mt-2 align-items-center">
+                <div class="col-4 col-sm-2"><span class="align-baseline">할인가</span></div>
+                <div class="col-8 col-sm-10 align-items-baseline">
+                    <span style="font-size:x-large; color:#E50000;"><b>@Html.DisplayFor(x => x.Product.PromotionPrice)</b></span>원 (@dc%할인)
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="row mt-2 align-items-center">
+                <div class="col-4 col-sm-2"><span class="align-baseline">판매가</span></div>
+                <div class="col-8 col-sm-10 align-items-baseline">
+                    <span style="font-size:x-large;"><b>@Html.DisplayFor(x => x.Product.Price)</b></span>원
+                </div>
+            </div>
+        }
+
+        @*수량 조절*@
+        <div class="row align-items-center py-3" style="background-color:rgb(225, 225, 225)">
+            <div class="col-sm-6">@Html.DisplayFor(x => x.Product.ProductName)</div>
+            <div class="col-sm-3 col-xs-6 input-group input-group-sm">
+                <div class="input-group-prepend">
+                    <button type="button" id="btnMinus" class="btn btn-outline-secondary">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+                <input type="text" id="txtProductCnt" class="form-control form-control-sm text-center" value="1" style="border-color:gray; min-width:30px; max-width:60px;" />
+                <div class="input-group-append">
+                    <button type="button" id="btnPlus" class="btn btn-outline-secondary">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="col-sm-3 col-xs-6 text-right"><b><span id="sumPrice"></span></b>원</div>
+        </div>
+
+        @*장바구니 바로구매 버튼*@
+        <div class="d-flex justify-content-end mt-4">
+            <div class="p-2">                
+                <button class="btn btn-lg btn-primary" onclick="ExcuteCheckoutModal()">장바구니</button>
+            </div>
+            <div class="p-2">                
+                <a href="#" onclick="window.location.href='@Url.Action("DirectPurchase", "Order", new { productId = Model.Product.ProductId, price = Model.Product.PromotionPrice ?? Model.Product.Price, productName = Model.Product.ProductName, mainImagePath = Model.ProductImages.FirstOrDefault(x => x.ImageUseTypeId == 1) == null ? "~/Images/ImageEmpty.jpg" : Model.ProductImages.First(x => x.ImageUseTypeId == 1).ImagePath })' + '&productCount=' + $('#txtProductCnt').val()" class="btn btn-lg btn-primary">바로 구매</a>                
+            </div>
+        </div>
+
+    </div>
+</div>
+<hr />
+
+@Html.Partial("ProductViewTab", new ViewDataDictionary { new KeyValuePair<string, object>("targetId", "detail") })
+@*상품상세정보*@
+
+@*사용자 입력 상품 Description*@
+@if (!string.IsNullOrWhiteSpace(Model.Product.Description))
+{
+    <div class="mt-3">
+        @Html.Raw(Model.Product.Description)
+    </div>
+}
+
+@*상품 상세 이미지*@
+<div class="mt-2">
+    @foreach (var item in Model.ProductImages.Where(x => x.ImageUseTypeId == 3))
+    {
+        <div class="row">
+            <div class="col-12 text-center">
+                <img src=@Url.Content(item.ImagePath) class="img-fluid" alt="">
+            </div>
+        </div>
+    }
+</div>
+
+@Html.Partial("ProductViewTab", new ViewDataDictionary { new KeyValuePair<string, object>("targetId", "review") })
+@*상품 후기*@
+<div class="row justify-content-center" id="ReviewList">
+    @Html.Action("ProductViewReview", "Review", new { productId = Model.Product.ProductId, page = 1, productName = Model.Product.ProductName })
+</div>
+<div class="d-flex justify-content-end">
+    @*전체보기 버튼*@
+    <div class="px-1"><a href='@Url.Action("List", "Review")' class="btn btn-sm btn-dark">전체보기</a></div>
+    @*상품후기 작성 버튼*@
+    <div class="px-1"><a href='@Url.Action("ReviewAddFromProductView", "Review", new { productId = Model.Product.ProductId, productName = Model.Product.ProductName, productImage = Model.ProductImages.FirstOrDefault(x => x.ImageUseTypeId == 1) == null ? "~/Images/ImageEmpty.jpg" : Model.ProductImages.FirstOrDefault(x => x.ImageUseTypeId == 1).ImagePath })' onclick="window.open(this.href, '상품 후기 작성', 'width=800, height=900'); return false;" class="btn btn-sm btn-dark">상품후기작성</a></div>
+</div>
+
+
+@Html.Partial("ProductViewTab", new ViewDataDictionary { new KeyValuePair<string, object>("targetId", "inquiry") })
+@*상품 문의*@
+<div class="row justify-content-center" id="InquiryList">
+    @Html.Action("ProductViewInquiry", "Inquiry", new { productId = Model.Product.ProductId, page = 1, productName = Model.Product.ProductName })
+</div>
+<div class="d-flex justify-content-end">
+    @*전체보기 버튼*@
+    <div class="px-1"><a href='@Url.Action("List", "Inquiry")' class="btn btn-sm btn-dark">전체보기</a></div>
+    @*상품문의 작성 버튼*@    
+    <div class="px-1"><a href='@Url.Action("InquiryAddFromProductView", "Inquiry", new { productId = Model.Product.ProductId, productName = Model.Product.ProductName, productImage = Model.ProductImages.FirstOrDefault(x => x.ImageUseTypeId == 1) == null ? "~/Images/ImageEmpty.jpg" : Model.ProductImages.FirstOrDefault(x => x.ImageUseTypeId == 1).ImagePath })' onclick="window.open(this.href, '상품 문의 작성', 'width=800, height=900'); return false;" class="btn btn-sm btn-dark">상품문의작성</a></div>
+</div>
+
+
+@Html.Partial("ProductViewTab", new ViewDataDictionary { new KeyValuePair<string, object>("targetId", "delivery") })
+@*배송 정보*@
+@Html.Partial("DeliveryInfo", "Product")
+
+
+@Html.Partial("ProductViewTab", new ViewDataDictionary { new KeyValuePair<string, object>("targetId", "exchange") })
+@*교환 및 반품정보*@
+@Html.Partial("ExchangeInfo", "Product")
+
+
+@*장바구니 저장 완료 modal*@
+<div class="modal fade" id="checkoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">장바구니 담기</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <div>
+                    <i class="fas fa-shopping-cart" style="font-size:50px; color:rgb(0, 123, 255);"></i>
+                </div>
+                <br />
+                <span><b>상품이 장바구니에 담겼습니다.</b></span>
+                <br />
+                <span>지금 확인하시겠습니까?</span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">계속 쇼핑하기</button>
+                <a class="btn btn-primary" href=@Url.Action("Index", "Checkout")>장바구니 보기</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts
+{
+    <script>
+        var productCount;
+        var userAuthorized = @User.Identity.IsAuthenticated.ToString().ToLower();
+        var product = @Html.Raw(Json.Encode(Model.Product));
+        var productPrice = product.PromotionPrice != null ? product.PromotionPrice : product.Price;
+
+        $(document).ready(function () {
+
+            productCount = 1;
+            $("#txtProductCnt").val(productCount);
+
+            CalculateSumPrice();
+
+            SetTabActiveClass();
+
+            $("img").not("#MainLogoImage").addClass("mw-100 h-auto"); //너무 큰 이미지 레이아웃에 맞게 축소
+
+            $(".my-rating").starRating({
+                starSize: 25,
+                starShape: 'rounded',
+                readOnly: true,
+                emptyColor: 'lightgray',
+                hoverColor: 'salmon',
+                activeColor: 'cornflowerblue',
+                callback: function (currentRating, $el) {
+                    // make a server call here
+                }
+            });
+        });
+
+
+        function SetTabActiveClass() { //partialView 로 로드한 탭에 active를 적용
+            $("div[name=PruductViewTab]").each(function () {
+                var target = "div[data-target='#" + $(this).attr("id") + "']";
+                $(this).children(target).addClass("active");
+            });
+        }
+
+        $(".menu div").click(function () { //클릭한 탭 메뉴로 스크롤 이동
+            var scrollPosition = $($(this).attr("data-target")).offset().top;
+
+            $("html, body").animate({
+                scrollTop: scrollPosition
+            }, 200);
+        });
+
+        $("#txtProductCnt").on("change", function () {
+            if (!$.isNumeric($(this).val())) {
+                alertify.alert("구매수량은 숫자만 가능합니다.");
+                $(this).val(1);
+                return false;
+            }
+
+            if ($(this).val() <= 0) {
+                alertify.alert("1개이상의 수량을 입력해주세요.");
+                $(this).val(1);
+                return false;
+            }
+        });
+
+        $("#btnMinus").on("click", function () {
+            if (productCount <= 1) {
+                return false;
+            }
+            productCount--;
+            $("#txtProductCnt").val(productCount);
+            CalculateSumPrice();
+        });
+
+        $("#btnPlus").on("click", function(){
+            productCount++;
+            $("#txtProductCnt").val(productCount);
+            CalculateSumPrice();
+        });
+
+        $("#txtProductCnt").on('propertychange change keyup paste input', function () {
+            productCount = $("#txtProductCnt").val(); //수량이 변경되면 productCount 변수에 반영하고 총금액을 계산
+            CalculateSumPrice();
+        });
+
+        function CalculateSumPrice() { //수량이 반영된 총금액
+            var sum = productCount * productPrice;
+            $("#sumPrice").text(CreateMoneyComma(sum));
+        };
+
+        function ExcuteCheckoutModal() {
+            if (userAuthorized) { //로그인된 경우 DB에 장바구니 추가
+                $.ajax({
+                    url: '@Url.Action("AddCart", "CheckOut")',
+                    type: "POST",
+                    data: { productId: product.ProductId, productCount: productCount, @Html.AntiForgeryTokenForAjaxPost() },
+                    success: function (data) {
+                        if (data.IsSuccess)
+                            $("#checkoutModal").modal("show");
+                        else
+                            alert("요청이 정상적으로 처리되지 않았습니다.\n" + data.ErrorMessage);
+                    },
+                    error: function (xhr, textStatus, errorThrownata) {
+                        var win = window.open("", "에러 메세지");
+                        win.document.write(xhr.responseText);
+                    }
+                });
+            }
+            else { //로그인 안된 경우 쿠키에 장바구니 추가
+                var checkouts;
+
+                if ($.cookie("Checkout") == null) { //쿠키가 없는 경우
+                    checkouts = [{ ProductId: product.ProductId, ProductCount: productCount } ];
+                }
+                else {
+                    checkouts = JSON.parse($.cookie("Checkout"));
+
+                    var index = checkouts.findIndex(x => x.ProductId == product.ProductId);
+
+                    if (index >= 0) { //쿠키에 동일한 상품이 있는 경우
+                        checkouts[index].ProductCount = productCount;
+                    }
+                    else { //동일한 상품이 없는 경우
+                        checkouts.push({ ProductId: product.ProductId, ProductCount: productCount });
+                    }
+                }
+
+                $.cookie("Checkout", JSON.stringify(checkouts), { expires: 7, path: "/" }); //쿠키에 저장
+
+                $("#checkoutModal").modal("show");
+            }
+        }
+
+        function showReviewContent(element) { //상품후기 내용 보임/숨김 토글
+            $(element).next().toggle();
+        }
+
+        function showInquiryContent(element) { //상품문의 내용 보임/숨김 토글
+            $(element).next().toggle();
+        }
+
+    </script>
+}

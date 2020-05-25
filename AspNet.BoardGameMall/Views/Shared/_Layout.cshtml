@@ -1,0 +1,150 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="shortcut icon" type="image/x-icon" href="~/Images/MainIcon.ico" />
+
+    <title>보드몰 @ViewBag.Title</title>
+    @Styles.Render("~/Content/css")
+    <link href="~/Content/fontawesome/css/all.css" rel="stylesheet" />
+    @Scripts.Render("~/bundles/modernizr")
+    @Styles.Render("~/Libraries/alertifyjs/css")
+    @Styles.Render("~/Libraries/star-rating-svg/css")
+    <link href="~/Content/PagedList.css" rel="stylesheet" />
+    <link href="~/Content/MenuStyle.css" rel="stylesheet" />
+
+    <style>
+        body {
+            padding-top: 10px !important;
+        }
+
+        .table {
+            border-bottom: 1px solid #dddddd;
+        }
+    </style>
+
+    @RenderSection("head", required: false)
+
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar navbar-expand-lg navbar-light pr-0 mt-2">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedMenu" aria-controls="navbarSupportedMenu" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse " id="navbarSupportedMenu">
+                <ul class="navbar-nav ml-auto">
+                    @if (Request.IsAuthenticated)
+                    {
+                        <li class="nav-item mx-2">
+                            @using (Html.BeginForm("LogOff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <b><a href="javascript:document.getElementById('logoutForm').submit()" class="nav-link p-1 p-lg-0">로그아웃</a></b>
+                            }
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item mx-2">
+                            <b>@Html.ActionLink("로그인", "Login", "Account", routeValues: null, htmlAttributes: new { id = "loginLink", @class = "nav-link p-1 p-lg-0" })</b>
+                        </li>
+                        <li class="nav-item mx-2">
+                            <b>@Html.ActionLink("회원가입", "Register", "Account", routeValues: null, htmlAttributes: new { id = "registerLink", @class = "nav-link p-1 p-lg-0" })</b>
+                        </li>
+                    }
+
+                    <li class="nav-item mx-2">
+                        <b>@Html.ActionLink("장바구니", "Index", "Checkout", null, new { @class = "nav-link p-1 p-lg-0" })</b>
+                    </li>
+                    <li class="nav-item mx-2">
+                        <b>@Html.ActionLink("주문조회", "List", "Order", null, new { @class = "nav-link p-1 p-lg-0" })</b>
+                    </li>
+                    <li class="nav-item mx-2">
+                        <b>@Html.ActionLink("상품후기", "List", "Review", null, new { @class = "nav-link p-1 p-lg-0" })</b>
+                    </li>
+                    <li class="nav-item ml-2">
+                        <b>@Html.ActionLink("상품문의", "List", "Inquiry", null, new { @class = "nav-link p-1 p-lg-0" })</b>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <hr class="mt-1" />
+
+        <div class="row">
+            <div class="col-12 text-center">
+                <a href="@Url.Action("Index", "Home")">
+                    <img id="MainLogoImage" src="~/Images/MainLogo.png" style="height:90px" />
+                </a>
+            </div>
+        </div>
+
+        <nav class="navbar navbar-expand-lg navbar-light pr-0 mt-2" style="background-color:rgb(246, 247, 248)">
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse " id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item mx-2">
+                        <a class="nav-link" href='@Url.Action("Category", "Product", new { id = 1 })'><b>전략게임</b></a>
+                    </li>
+                    <li class="nav-item mx-2">
+                        <a class="nav-link" href='@Url.Action("Category", "Product", new { id = 2 })'><b>가족게임</b></a>
+                    </li>
+                    <li class="nav-item mx-2">
+                        <a class="nav-link" href='@Url.Action("Category", "Product", new { id = 3 })'><b>파티게임</b></a>
+                    </li>
+                    <li class="nav-item mx-2">
+                        <a class="nav-link" href='@Url.Action("Category", "Product", new { id = 4 })'><b>테마게임</b></a>
+                    </li>
+                </ul>
+            </div>
+
+            @using (Html.BeginForm("Search", "Product", FormMethod.Get, new { @class = "form-inline my-0 flex-nowrap float-right" }))
+            {
+                @Html.TextBox("name", null, new { @class = "form-control mr-0", placeholder = "검색" })
+                <button class="btn btn-sm my-2 my-sm-0" type="submit">
+                    <i class="fas fa-search"></i>
+                </button>
+            }
+        </nav>
+    </div>
+
+    <div class="container body-content mt-3" style="min-height:600px;">
+        @RenderBody()
+    </div>
+    <div class="container body-content">
+        <hr />
+        <footer>
+            <p>포트폴리오 데모 사이트 - leebooboo@naver.com</p>
+        </footer>
+    </div>
+
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/jqueryval")
+    @Scripts.Render("~/bundles/bootstrap")
+    @Scripts.Render("~/Libraries/alertifyjs")
+    @Scripts.Render("~/Libraries/ckeditor")
+    @Scripts.Render("~/Libraries/star-rating-svg")
+    <script src="~/Scripts/GlobalFunction.js"></script>
+
+    <script>
+        if ('@ViewBag.IsAlertifySuccess' != null && '@ViewBag.IsAlertifySuccess' == 'True') {
+            alertify.success('@ViewBag.AlertifySuccessMsg');
+        }
+
+        if ('@ViewBag.IsAlertifyError' != null && '@ViewBag.IsAlertifyError' == 'True') {
+            alertify.error('@ViewBag.AlertifyErrorMsg');
+        }
+    </script>
+
+    @RenderSection("scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,25 @@
+﻿@model IEnumerable<Portfolio.Entities.Models.Product>
+
+@if (@ViewBag.SearchCount > 0)
+{
+    <p>
+        <b>@ViewBag.SearchText</b> 검색결과 <b><span>@ViewBag.SearchCount</span>개</b>가 있습니다.
+    </p>
+}
+else
+{
+    <p>
+        <b>@ViewBag.SearchText</b> 검색결과가 없습니다.
+    </p>
+}
+
+<hr>
+
+<div class="row row-cols-1 row-cols-md-4">
+
+    @foreach (var item in Model)
+    {
+        @Html.Partial("ProductCard", item);
+    }
+
+</div>

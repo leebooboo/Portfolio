@@ -1,0 +1,6 @@
+﻿@model IEnumerable<Portfolio.Entities.Models.Product>
+
+@foreach (var item in Model)
+{
+    @Html.Partial("ProductCard", item)
+}

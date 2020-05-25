@@ -1,0 +1,79 @@
+﻿@model AspNet.BoardGameMall.Models.HomeIndexViewModel
+
+@{
+        ViewBag.Title = "";
+        AjaxOptions ajaxOptions = new AjaxOptions
+        {
+            UpdateTargetId = "ProductList",
+            HttpMethod = "GET",
+            InsertionMode = InsertionMode.InsertAfter,
+            OnSuccess = "setPageNum"
+    };
+}
+
+@section head
+{
+    <link href="~/Libraries/bxslider/jquery.bxslider.css" rel="stylesheet" />
+}
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-9">
+            <div class="bxslider">
+                <div><a href="@Url.Action("View", "Product", new { id = 30 })"><img src="~/Images/SliderImages/slider1.jpg" /></a></div>
+                <div><a href="@Url.Action("View", "Product", new { id = 24 })"><img src="~/Images/SliderImages/slider2.png" /></a></div>
+                <div><a href="@Url.Action("View", "Product", new { id = 83 })"><img src="~/Images/SliderImages/slider3.png" /></a></div>
+                <div><a href="@Url.Action("View", "Product", new { id = 48 })"><img src="~/Images/SliderImages/slider4.jpg" /></a></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-4" id="ProductList">
+        @Html.Partial("ProductList", Model.ProductList)
+    </div>
+<div class="row justify-content-center">
+    @using (Ajax.BeginForm("ProductList", "Product", ajaxOptions))
+    {
+        @Html.HiddenFor(x => x.Page)
+        <input type="submit" value="더보기" class="btn btn-outline-success" style="" />
+    }
+</div>
+
+
+@section scripts
+{
+    <script src="~/Libraries/bxslider/jquery.bxslider.js"></script>
+
+    <script>
+        function setPageNum(data) {
+            
+            history.pushState({ ajax: data }, "보드몰");
+
+            $("#Page").val( parseInt($("#Page").val()) + 1); 
+        }
+
+        window.onpopstate = function (event) {
+            console.log("popstate");
+            var data = event.originalEvent.state;
+            console.log(data);
+        };
+
+        $(document).ready(function () {
+            var slider = $('.bxslider').bxSlider({
+                adaptiveHeight: false,
+                mode: 'horizontal',
+                auto: true,
+                autoControls: false,
+                stopAutoOnClick: false,
+                pager: true,
+                pause: 2500,
+                slideWidth: 1600,
+                touchEnabled: (navigator.maxTouchPoints > 0)
+            });
+
+            slider.reloadSlider();
+        });
+    </script>
+
+}
+
+

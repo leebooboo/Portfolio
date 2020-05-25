@@ -1,0 +1,17 @@
+﻿@model IEnumerable<Portfolio.Entities.Models.Product>
+
+@{
+    ViewBag.Title = ViewBag.CategoryName;
+}
+
+<div class="row row-cols-1 row-cols-md-4">
+
+    @foreach (var item in Model)
+    {
+        @Html.Partial("ProductCard", item);
+    }
+
+</div>
+
+
+

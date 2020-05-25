@@ -1,0 +1,115 @@
+﻿@model Portfolio.Entities.Models.Inquiry
+
+@{
+    Layout = null;
+    AjaxOptions ajaxOptions = new AjaxOptions
+    {
+        OnSuccess = "success",
+        OnBegin = "beforeAjaxSend"
+    };
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link rel="shortcut icon" type="image/x-icon" href="~/Images/MainIcon.ico" />
+    <title>상품문의 작성</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+
+    <style>
+        body {
+            padding-top: 10px !important;
+            padding-bottom: 0px !important;
+        }
+    </style>
+
+    <script src="~/Libraries/ckeditor/ckeditor.js"></script>
+</head>
+<body>
+    <div class="container">
+        @using (Ajax.BeginForm("InquiryAddFromProductView", "Inquiry", ajaxOptions))
+        {
+            @Html.AntiForgeryToken()
+
+            @Html.HiddenFor(x => x.ProductId)
+            @Html.HiddenFor(x => x.RefId)
+            @Html.HiddenFor(x => x.RefLevel)
+
+            <div class="form-horizontal">
+                <h4>상품문의 작성</h4>
+                <div class="row">
+                    <div class="col-2">
+                        <img src=@Url.Content(ViewBag.productImage) class="img-thumbnail p-1" alt="" />
+                    </div>
+                    <div class="col-10 align-self-center">@ViewBag.productName</div>
+                </div>
+                <hr />
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Title, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control" } })
+                        @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.IsLocked, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-md-10">
+                        <div class="checkbox">
+                            @Html.EditorFor(model => model.IsLocked)
+                            @Html.ValidationMessageFor(model => model.IsLocked, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    @Html.LabelFor(model => model.Content, htmlAttributes: new { @class = "control-label col-md-2" })
+                    <div class="col-12">
+                        @Html.TextAreaFor(model => model.Content)
+                        @Html.ValidationMessageFor(model => model.Content, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col text-right">
+                        <input type="submit" value="등록" class="btn btn-primary" />
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/popper")
+    @Scripts.Render("~/bundles/bootstrap")
+
+    <script>
+        CKEDITOR.replace(@Html.IdFor(model => model.Content), {
+            extraPlugins: 'image2,uploadimage',
+            filebrowserUploadUrl: '@Url.Action("UploadImage", "Image")?productId=@Model.ProductId&imageUseType=4',
+            filebrowserImageUploadUrl: '@Url.Action("UploadImage", "Image")?productId=@Model.ProductId&imageUseType=4',
+            uploadUrl: '@Url.Action("UploadImage", "Image")?productId=@Model.ProductId&imageUseType=4',
+            height: 450
+        });
+
+        function beforeAjaxSend() {
+            //Validation check
+        };
+
+        function success(data) {
+            if (data.IsSuccess) { //Url.Action() 에서 라우트 데이터가 2개 이상이면 & 을 &amp; 으로 변환하는데, 그냥 사용하면 ajax가 정상 작동을 안해서 Html.Raw로 감싸줘야됨
+                $(opener.document).find("#InquiryList").load('@Html.Raw(Url.Action("ProductViewInquiry", "Inquiry", new { productId = Model.ProductId, page = 1 }))', function () {
+                    window.close(); //ajax.load() 완료 콜백으로 안넣으면 load()가 제대로 동작을 안함
+                });
+            }
+            else
+                alert("요청이 정상적으로 처리되지 않았습니다.<br>" + data.ErrorMessage);
+        }
+    </script>
+</body>
+</html>
+

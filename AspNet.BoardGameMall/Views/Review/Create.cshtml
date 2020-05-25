@@ -1,0 +1,76 @@
+﻿@model Portfolio.Entities.Models.Review
+
+@{
+    ViewBag.Title = "상품후기 작성";
+}
+
+@Html.MenuIdentity("상품후기 작성")
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.RefId)
+    @Html.HiddenFor(model => model.RefLevel)
+
+    <div class="form-row">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        <label>@Html.DisplayNameFor(x => x.Product.ProductName)</label>
+        @Html.DropDownList("ProductId", null, htmlAttributes: new { @class = "form-control col-6" })
+        @Html.ValidationMessageFor(model => model.ProductId, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group ">
+        <label>@Html.DisplayNameFor(x => x.Rating)</label>
+        <div class="starRating " data-rating='@Model.Rating'></div>
+        @Html.HiddenFor(model => model.Rating)
+        @Html.ValidationMessageFor(model => model.Rating, "", new { @class = "text-danger" })
+    </div>
+    
+    <div class="form-group">
+        <label>@Html.DisplayNameFor(x => x.Title)</label>
+        @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control" } })
+        @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+    </div>
+
+    <div class="form-group">
+        <label>@Html.DisplayNameFor(x => x.Content)</label>
+        @Html.ValidationMessageFor(model => model.Content, "", new { @class = "text-danger" })
+        @Html.TextAreaFor(model => model.Content)
+    </div>
+
+    <div class="row">
+        <div class="col text-right">
+            <input type="submit" value="작성" class="btn btn-sm btn-outline-secondary ml-2" />
+            @Html.ActionLink("목록", "List", null, new { @class = "btn btn-sm btn-outline-secondary ml-2" })
+        </div>
+    </div>
+}
+
+
+@section scripts
+{
+    <script>
+        $(".starRating").starRating({
+            starSize: 25,
+            starShape: 'rounded',
+            emptyColor: 'lightgray',
+            hoverColor: 'salmon',
+            activeColor: 'rgb(100, 149, 237)',
+            disableAfterRate: false,
+            callback: function (currentRating, $el) {
+                $('#@Html.IdFor(x => x.Rating)').val(currentRating);
+            }
+        });
+
+        CKEDITOR.replace(@Html.IdFor(model => model.Content), {
+            extraPlugins: 'image2,uploadimage',
+            filebrowserUploadUrl: '@Url.Action("UploadImage", "Image")?productId=@Model.ProductId&imageUseType=4',
+            filebrowserImageUploadUrl: '@Url.Action("UploadImage", "Image")?productId=@Model.ProductId&imageUseType=4',
+            uploadUrl: '@Url.Action("UploadImage", "Image")?productId=@Model.ProductId&imageUseType=4',
+            height: 450
+        });
+    </script>
+}
