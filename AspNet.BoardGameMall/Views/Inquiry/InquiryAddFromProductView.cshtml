@@ -85,7 +85,7 @@
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/popper")
     @Scripts.Render("~/bundles/bootstrap")
-    @Scripts.Render("~/bundles/ckeditor")
+    <script src="~/Libraries/ckeditor/ckeditor.js"></script>
 
     <script>
         CKEDITOR.replace(@Html.IdFor(model => model.Content), {

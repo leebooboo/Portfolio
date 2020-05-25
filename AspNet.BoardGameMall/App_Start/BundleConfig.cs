@@ -19,6 +19,7 @@ namespace AspNet.BoardGameMall
 
             bundles.Add(new StyleBundle("~/bundles/star-rating-svg/css").Include(
                           "~/Libraries/star-rating-svg/css/star-rating-svg.css"));
+
             #endregion
 
 
@@ -45,9 +46,6 @@ namespace AspNet.BoardGameMall
             bundles.Add(new ScriptBundle("~/bundles/alertifyjs").Include(
                       "~/Libraries/alertifyjs/alertify.js",
                       "~/Scripts/alertify.init.setting.js"));
-
-            bundles.Add(new ScriptBundle("~/bundles/ckeditor").Include(
-                      "~/Libraries/ckeditor/ckeditor.js"));
 
             bundles.Add(new ScriptBundle("~/bundles/star-rating-svg").Include(
                       "~/Libraries/star-rating-svg/jquery.star-rating-svg.js"));

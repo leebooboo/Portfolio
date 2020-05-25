@@ -9,6 +9,7 @@
 @using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.ProductId)
     @Html.HiddenFor(model => model.RefId)
     @Html.HiddenFor(model => model.RefLevel)
 

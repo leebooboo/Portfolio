@@ -6,9 +6,10 @@
 
 @Html.MenuIdentity("상품문의 답글 작성")
 
-@using (Html.BeginForm("Reply", "Inquiry", FormMethod.Post, new { id = "frm"}))
+@using (Html.BeginForm("Reply", "Inquiry", FormMethod.Post, new { id = "frm" }))
 {
     @Html.AntiForgeryToken()
+    @Html.HiddenFor(model => model.ProductId)
     @Html.HiddenFor(model => model.RefId)
     @Html.HiddenFor(model => model.RefLevel)
 
@@ -37,7 +38,7 @@
     <div class="row">
         <div class="col text-right">
             <input type="submit" value="작성" class="btn btn-sm btn-outline-secondary ml-2" />
-            <button class="btn btn-sm btn-outline-secondary ml-2" onclick = "returnList()" >목록</button>
+            <button class="btn btn-sm btn-outline-secondary ml-2" onclick="returnList()">목록</button>
         </div>
     </div>
 }
