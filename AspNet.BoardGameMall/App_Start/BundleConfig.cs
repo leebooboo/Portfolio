@@ -14,8 +14,8 @@ namespace AspNet.BoardGameMall
                           "~/Content/site.css"));
 
             bundles.Add(new StyleBundle("~/Libraries/alertifyjs/css").Include(
-                      "~/Libraries/alertifyjs/css/alertify.min.css",
-                      "~/Libraries/alertifyjs/css/themes/bootstrap.min.css"));
+                      "~/Libraries/alertifyjs/css/alertify.css",
+                      "~/Libraries/alertifyjs/css/themes/bootstrap.css"));
 
             bundles.Add(new StyleBundle("~/Libraries/star-rating-svg/css").Include(
                           "~/Libraries/star-rating-svg/css/star-rating-svg.css"));
